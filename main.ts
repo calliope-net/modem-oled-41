@@ -67,7 +67,7 @@ let led_an = false
 let helligkeit = 0
 let takt = 0
 if (!(pins.simulator())) {
-    takt = 400
+    takt = 50
     helligkeit = 50
     modem.set_pins(DigitalPin.C17, AnalogPin.C16, helligkeit)
     modem.set_takt(takt, 0.5, 1)
@@ -80,8 +80,8 @@ if (!(pins.simulator())) {
     pins.oled_reset(pins.oled_pages.y64, false, true)
     pins.oled_write_text(0, 0, 15, "hell<" + helligkeit + "<dunkel")
     modem.comment("zeigt analogen Wert vom Fototransistor")
-    pins.oled_write_text(1, 0, 7, "FT " + pins.pinAnalogRead(pins.pins_AnalogPin(AnalogPin.C16)))
-    pins.oled_write_text(1, 8, 15, "Takt " + takt)
+    pins.oled_write_text(1, 0, 6, "FT " + pins.pinAnalogRead(pins.pins_AnalogPin(AnalogPin.C16)))
+    pins.oled_write_text(1, 7, 15, "Takt " + takt)
 }
 basic.forever(function () {
     if (ft_messen) {
