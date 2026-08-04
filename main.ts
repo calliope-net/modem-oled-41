@@ -68,7 +68,7 @@ let helligkeit = 0
 let takt = 0
 if (!(pins.simulator())) {
     takt = 50
-    helligkeit = 50
+    helligkeit = 15
     modem.set_pins(DigitalPin.C17, AnalogPin.C16, helligkeit)
     modem.set_takt(takt, 0.5, 1)
     modem.comment("weiß wenn hell (Fehler); grün wenn dunkel (OK)")
