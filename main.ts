@@ -80,12 +80,12 @@ if (!(pins.simulator())) {
     pins.oled_reset(pins.oled_pages.y64, false, true)
     pins.oled_write_text(0, 0, 15, "hell<" + helligkeit + "<dunkel")
     modem.comment("zeigt analogen Wert vom Fototransistor")
-    pins.oled_write_text(1, 0, 7, "FT " + pins.analogReadPin(AnalogPin.C16))
+    pins.oled_write_text(1, 0, 7, "FT " + pins.pinAnalogRead(pins.pins_AnalogPin(AnalogPin.C16)))
     pins.oled_write_text(1, 8, 15, "Takt " + takt)
 }
 basic.forever(function () {
     if (ft_messen) {
-        pins.oled_write_text(1, 0, 7, "FT " + pins.analogReadPin(AnalogPin.C16))
+        pins.oled_write_text(1, 0, 7, "FT " + pins.pinAnalogRead(pins.pins_AnalogPin(AnalogPin.C16)))
         basic.pause(500)
     }
 })

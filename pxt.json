@@ -5,7 +5,7 @@
     "dependencies": {
         "core": "*",
         "modem": "github:calliope-net/modem#v0.1.0",
-        "pins": "github:calliope-net/pins#v1.5.15"
+        "pins": "github:calliope-net/pins#v1.5.17"
     },
     "files": [
         "main.blocks",
