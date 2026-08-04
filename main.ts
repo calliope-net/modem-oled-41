@@ -20,7 +20,7 @@ input.onButtonEvent(Button.A, input.buttonEventClick(), function () {
 })
 function empfangen () {
     etext = ""
-    while (true) {
+    while (!(ebreak)) {
         easc = modem.empfange_1zeichen()
         if (easc == 13) {
             break;
@@ -35,6 +35,7 @@ function empfangen () {
 }
 input.onButtonEvent(Button.AB, input.buttonEventClick(), function () {
     modem.empfang_abbrechen()
+    ebreak = true
     basic.showString(etext)
 })
 input.onButtonEvent(Button.B, input.buttonEventClick(), function () {
@@ -48,10 +49,12 @@ input.onButtonEvent(Button.B, input.buttonEventClick(), function () {
 })
 input.onButtonEvent(Button.A, ButtonEvent.Hold, function () {
     basic.setLedColor(0xff0080)
-    empfangen()
+    ebreak = false
+    pins.oled_write_text(7, 0, 15, empfangen())
     basic.turnRgbLedOff()
 })
 let easc = 0
+let ebreak = false
 let etext = ""
 let stext = ""
 let helligkeit = 0
