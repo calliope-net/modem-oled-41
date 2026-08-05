@@ -52,11 +52,17 @@ input.onButtonEvent(Button.B, input.buttonEventClick(), function () {
     basic.turnRgbLedOff()
 })
 input.onButtonEvent(Button.A, ButtonEvent.Hold, function () {
+    modem.comment("LED dauerhaft an/aus schalten")
     led_an = !(led_an)
     pins.pinDigitalWrite(pins.pins_eDigitalPins(pins.eDigitalPins.C17), led_an)
 })
 input.onButtonEvent(Button.B, ButtonEvent.Hold, function () {
     ft_messen = !(ft_messen)
+    if (ft_messen) {
+        pins.oled_write_text(1, 7, 15, pins.pins_text("dauerhaft"))
+    } else {
+        pins.oled_write_text(1, 7, 15, "Takt " + takt)
+    }
 })
 let ft_messen = false
 let easc = 0
@@ -71,7 +77,7 @@ if (!(pins.simulator())) {
     helligkeit = 15
     modem.set_pins(DigitalPin.C17, AnalogPin.C16, helligkeit)
     modem.set_takt(takt, 0.5, 1)
-    modem.comment("weiß wenn hell (Fehler); grün wenn dunkel (OK)")
+    modem.comment("weiß zu hell; grün OK")
     if (modem.empfange1bit()) {
         basic.setLedColor(0xffffff)
     } else {
@@ -79,7 +85,7 @@ if (!(pins.simulator())) {
     }
     pins.oled_reset(pins.oled_pages.y64, false, true)
     pins.oled_write_text(0, 0, 15, "hell<" + helligkeit + "<dunkel")
-    modem.comment("zeigt analogen Wert vom Fototransistor")
+    modem.comment("analoge Helligkeit")
     pins.oled_write_text(1, 0, 6, "FT " + pins.pinAnalogRead(pins.pins_AnalogPin(AnalogPin.C16)))
     pins.oled_write_text(1, 7, 15, "Takt " + takt)
 }
