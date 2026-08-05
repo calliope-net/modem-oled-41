@@ -115,7 +115,7 @@ let i2c_schleife = false
 let kb_on = false
 if (!(pins.simulator())) {
     modem.set_pins(DigitalPin.C17, AnalogPin.C16)
-    modem.set_takt(50, 0.5, 1)
+    modem.set_takt(400, 0.5, 1)
     pins.oled_reset(pins.oled_pages.y64, false, true)
     anzeige01_aktualisieren()
     kb_on = pins.keyboard_read() == 13
