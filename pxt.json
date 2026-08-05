@@ -4,8 +4,8 @@
     "description": "",
     "dependencies": {
         "core": "*",
-        "modem": "github:calliope-net/modem#v0.1.3",
-        "pins": "github:calliope-net/pins#v1.5.17"
+        "modem": "github:calliope-net/modem#v0.1.5",
+        "pins": "github:calliope-net/pins#v1.5.19"
     },
     "files": [
         "main.blocks",
