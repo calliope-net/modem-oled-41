@@ -1,18 +1,12 @@
-function GitHub () {
-    modem.comment("calliope-net/modem-41")
-    modem.comment("2 Erweiterungen laden:")
-    modem.comment("calliope-net/modem; calliope-net/pins")
-}
-input.onButtonEvent(Button.A, input.buttonEventClick(), function () {
+function senden (send_text: string) {
     modem.comment("blau: Text senden")
-    send_text = "Modem"
     if (led_an) {
         led_an = false
         pins.pinDigitalWrite(modem.get_settings(modem.e_settings.pin_led), led_an)
         basic.pause(2000)
     }
     ft_messen = false
-    anzeige_aktualisieren()
+    anzeige01_aktualisieren()
     basic.setLedColor(0x0000ff)
     pins.oled_clear(2, 4)
     pins.oled_write_text(2, 0, 15, pins.pins_text("Senden Start"))
@@ -25,7 +19,15 @@ input.onButtonEvent(Button.A, input.buttonEventClick(), function () {
     modem.comment("ENTER (CR) anhängen")
     modem.sende_code(13)
     pins.oled_write_text(2, 0, 15, "Senden Ende " + send_text.length)
-    basic.setLedColor(0x00ff00)
+    led_aktualisieren()
+}
+function GitHub () {
+    modem.comment("calliope-net/modem-41")
+    modem.comment("2 Erweiterungen laden:")
+    modem.comment("calliope-net/modem; calliope-net/pins")
+}
+input.onButtonEvent(Button.A, input.buttonEventClick(), function () {
+    senden("Modem-OLED-41")
 })
 function empfangen () {
     empf_text = ""
@@ -42,11 +44,32 @@ function empfangen () {
     }
     return empf_text
 }
+function led_aktualisieren () {
+    modem.comment("weiß zu hell; grün OK")
+    if (modem.empfange1bit()) {
+        basic.setLedColor(0xffffff)
+    } else {
+        basic.setLedColor(0x00ff00)
+    }
+}
 input.onButtonEvent(Button.AB, input.buttonEventClick(), function () {
     modem.empfang_abbrechen()
     empf_break = true
 })
-function anzeige_aktualisieren () {
+input.onButtonEvent(Button.B, input.buttonEventClick(), function () {
+    modem.comment("rot: Text empfangen")
+    ft_messen = false
+    anzeige01_aktualisieren()
+    basic.setLedColor(0xff0000)
+    empf_break = false
+    pins.oled_clear(5, 7)
+    pins.oled_write_text(5, 0, 15, pins.pins_text("Empfang Start"))
+    e_text = empfangen()
+    pins.oled_write_text(7, 0, 15, e_text)
+    pins.oled_write_text(5, 0, 15, "Empfang Ende " + e_text.length)
+    led_aktualisieren()
+})
+function anzeige01_aktualisieren () {
     pins.oled_write_text(0, 0, 15, "hell<" + modem.get_settings(modem.e_settings.helligkeit) + "<dunkel")
     pins.oled_write_text(1, 0, 6, "FT " + pins.pinAnalogRead(modem.get_settings(modem.e_settings.pin_fototransistor)))
     if (ft_messen) {
@@ -55,19 +78,6 @@ function anzeige_aktualisieren () {
         pins.oled_write_text(1, 7, 15, "Takt " + modem.get_settings(modem.e_settings.takt_ms))
     }
 }
-input.onButtonEvent(Button.B, input.buttonEventClick(), function () {
-    modem.comment("rot: Text empfangen")
-    ft_messen = false
-    anzeige_aktualisieren()
-    basic.setLedColor(0xff0000)
-    empf_break = false
-    pins.oled_clear(5, 7)
-    pins.oled_write_text(5, 0, 15, pins.pins_text("Empfang Start"))
-    e_text = empfangen()
-    pins.oled_write_text(7, 0, 15, e_text)
-    pins.oled_write_text(5, 0, 15, "Empfang Ende " + e_text.length)
-    basic.setLedColor(0x00ff00)
-})
 input.onButtonEvent(Button.A, ButtonEvent.Hold, function () {
     modem.comment("LED dauerhaft an/aus schalten")
     led_an = !(led_an)
@@ -78,7 +88,7 @@ input.onButtonEvent(Button.A, ButtonEvent.Hold, function () {
 input.onButtonEvent(Button.B, ButtonEvent.Hold, function () {
     modem.comment("dauerhaft Helligkeit messen")
     ft_messen = !(ft_messen)
-    anzeige_aktualisieren()
+    anzeige01_aktualisieren()
 })
 let e_text = ""
 let empf_asc = 0
@@ -86,18 +96,12 @@ let empf_break = false
 let empf_text = ""
 let ft_messen = false
 let led_an = false
-let send_text = ""
 if (!(pins.simulator())) {
     modem.set_pins(DigitalPin.C17, AnalogPin.C16, 15)
     modem.set_takt(50, 0.5, 1)
-    modem.comment("weiß zu hell; grün OK")
-    if (modem.empfange1bit()) {
-        basic.setLedColor(0xffffff)
-    } else {
-        basic.setLedColor(0x00ff00)
-    }
+    led_aktualisieren()
     pins.oled_reset(pins.oled_pages.y64, false, true)
-    anzeige_aktualisieren()
+    anzeige01_aktualisieren()
 }
 loops.everyInterval(500, function () {
     if (ft_messen) {
