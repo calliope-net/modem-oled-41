@@ -26,6 +26,21 @@ function GitHub () {
     modem.comment("2 Erweiterungen laden:")
     modem.comment("calliope-net/modem; calliope-net/pins")
 }
+pins.onKeyboardEvent(function (zeichenCode, zeichenText, isASCII) {
+    if (s_text.length == 0) {
+        pins.oled_clear(2, 4)
+    }
+    if (zeichenText == "*") {
+        s_text = ""
+        pins.oled_write_text(3, 0, 15, s_text)
+    } else if (zeichenCode == 13 || zeichenText == "#") {
+        senden(s_text)
+        s_text = ""
+    } else if (isASCII) {
+        s_text = "" + s_text + zeichenText
+        pins.oled_write_text(3, 0, 15, s_text)
+    }
+})
 input.onButtonEvent(Button.A, input.buttonEventClick(), function () {
     senden("Modem-OLED-41")
 })
@@ -94,15 +109,27 @@ let e_text = ""
 let empf_asc = 0
 let empf_break = false
 let empf_text = ""
+let s_text = ""
 let ft_messen = false
 let led_an = false
+let kb_on = false
 if (!(pins.simulator())) {
     modem.set_pins(DigitalPin.C17, AnalogPin.C16, 15)
     modem.set_takt(50, 0.5, 1)
     led_aktualisieren()
     pins.oled_reset(pins.oled_pages.y64, false, true)
     anzeige01_aktualisieren()
+    kb_on = pins.buffer_getUint8(pins.pins_i2cReadBuffer(pins.pins_i2cAdressen(pins.ei2cAdressen.CardKB_x5F), 1), 0) == 13
+    if (kb_on) {
+        pins.oled_write_text(2, 0, 15, pins.pins_text("Keyboard on"))
+    } else if (pins.keypadConnected()) {
+        pins.oled_write_text(2, 0, 15, pins.pins_text("Keypad on"))
+    }
 }
+loops.everyInterval(500, function () {
+    pins.raiseKeyboardEvent(kb_on)
+    pins.raiseKeypadEvent(pins.keypadConnected())
+})
 loops.everyInterval(500, function () {
     if (ft_messen) {
         pins.oled_write_text(1, 0, 6, "FT " + pins.pinAnalogRead(modem.get_settings(modem.e_settings.pin_fototransistor)))
