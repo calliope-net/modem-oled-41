@@ -4,8 +4,8 @@ function GitHub () {
     modem.comment("calliope-net/modem; calliope-net/pins")
 }
 input.onButtonEvent(Button.A, input.buttonEventClick(), function () {
-    if (led_an) {
-        pins.pinDigitalWrite(pins.pins_eDigitalPins(pins.eDigitalPins.C17), false)
+    if (pins.pinDigitalRead(modem.get_settings(modem.e_settings.pin_led))) {
+        pins.pinDigitalWrite(modem.get_settings(modem.e_settings.pin_led), false)
         basic.pause(2000)
     }
     modem.comment("blau: Text 'Modem' senden")
@@ -53,15 +53,14 @@ input.onButtonEvent(Button.B, input.buttonEventClick(), function () {
 })
 input.onButtonEvent(Button.A, ButtonEvent.Hold, function () {
     modem.comment("LED dauerhaft an/aus schalten")
-    led_an = !(led_an)
-    pins.pinDigitalWrite(pins.pins_eDigitalPins(pins.eDigitalPins.C17), led_an)
+    pins.pinDigitalWrite(modem.get_settings(modem.e_settings.pin_led), !(pins.pinDigitalRead(modem.get_settings(modem.e_settings.pin_led))))
 })
 input.onButtonEvent(Button.B, ButtonEvent.Hold, function () {
     ft_messen = !(ft_messen)
     if (ft_messen) {
         pins.oled_write_text(1, 7, 15, pins.pins_text("dauerhaft"))
     } else {
-        pins.oled_write_text(1, 7, 15, "Takt " + takt)
+        pins.oled_write_text(1, 7, 15, "Takt " + modem.get_settings(modem.e_settings.takt_ms))
     }
 })
 let ft_messen = false
@@ -69,14 +68,9 @@ let easc = 0
 let ebreak = false
 let etext = ""
 let stext = ""
-let led_an = false
-let helligkeit = 0
-let takt = 0
 if (!(pins.simulator())) {
-    takt = 50
-    helligkeit = 15
-    modem.set_pins(DigitalPin.C17, AnalogPin.C16, helligkeit)
-    modem.set_takt(takt, 0.5, 1)
+    modem.set_pins(DigitalPin.C17, AnalogPin.C16, 15)
+    modem.set_takt(50, 0.5, 1)
     modem.comment("weiß zu hell; grün OK")
     if (modem.empfange1bit()) {
         basic.setLedColor(0xffffff)
@@ -84,14 +78,14 @@ if (!(pins.simulator())) {
         basic.setLedColor(0x00ff00)
     }
     pins.oled_reset(pins.oled_pages.y64, false, true)
-    pins.oled_write_text(0, 0, 15, "hell<" + helligkeit + "<dunkel")
+    pins.oled_write_text(0, 0, 15, "hell<" + modem.get_settings(modem.e_settings.helligkeit) + "<dunkel")
     modem.comment("analoge Helligkeit")
-    pins.oled_write_text(1, 0, 6, "FT " + pins.pinAnalogRead(pins.pins_AnalogPin(AnalogPin.C16)))
-    pins.oled_write_text(1, 7, 15, "Takt " + takt)
+    pins.oled_write_text(1, 0, 6, "FT " + pins.pinAnalogRead(modem.get_settings(modem.e_settings.pin_fototransistor)))
+    pins.oled_write_text(1, 7, 15, "Takt " + modem.get_settings(modem.e_settings.takt_ms))
 }
 basic.forever(function () {
     if (ft_messen) {
-        pins.oled_write_text(1, 0, 7, "FT " + pins.pinAnalogRead(pins.pins_AnalogPin(AnalogPin.C16)))
+        pins.oled_write_text(1, 0, 7, "FT " + pins.pinAnalogRead(modem.get_settings(modem.e_settings.pin_fototransistor)))
         basic.pause(500)
     }
 })
