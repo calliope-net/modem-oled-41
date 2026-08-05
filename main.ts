@@ -76,6 +76,7 @@ input.onButtonEvent(Button.A, ButtonEvent.Hold, function () {
     pins.oled_write_text(3, 0, 15, "Senden LED " + led_an)
 })
 input.onButtonEvent(Button.B, ButtonEvent.Hold, function () {
+    modem.comment("dauerhaft Helligkeit messen")
     ft_messen = !(ft_messen)
     anzeige_aktualisieren()
 })
@@ -98,9 +99,8 @@ if (!(pins.simulator())) {
     pins.oled_reset(pins.oled_pages.y64, false, true)
     anzeige_aktualisieren()
 }
-basic.forever(function () {
+loops.everyInterval(500, function () {
     if (ft_messen) {
         pins.oled_write_text(1, 0, 6, "FT " + pins.pinAnalogRead(modem.get_settings(modem.e_settings.pin_fototransistor)))
-        basic.pause(500)
     }
 })
