@@ -9,7 +9,7 @@ function senden (send_text: string) {
     anzeige01_aktualisieren()
     basic.setLedColor(0x0000ff)
     pins.oled_clear(2, 4)
-    pins.oled_write_text(2, 0, 15, pins.pins_text("Senden Start"))
+    pins.oled_write_text(2, 0, 15, pins.pins_text("Senden Start " + send_text.length))
     pins.oled_write_text(3, 0, 15, send_text)
     for (let Index = 0; Index <= send_text.length - 1; Index++) {
         modem.comment("jedes Zeichen erst anzeigen, dann senden")
@@ -34,17 +34,16 @@ pins.onKeyboardEvent(function (zeichenCode, zeichenText, isASCII) {
     if (s_text.length == 0) {
         pins.oled_clear(2, 4)
     }
-    if (zeichenText == "*") {
-        s_text = ""
-        pins.oled_write_text(3, 0, 15, s_text)
-    } else if (zeichenCode == 13 || zeichenText == "#") {
+    if (s_text.length > 0 && (zeichenCode == 13 || zeichenText == "#")) {
         senden(s_text)
-        s_text = ""
-    } else if (isASCII) {
-        s_text = "" + s_text + zeichenText
-        pins.oled_write_text(3, 0, 15, s_text)
-    } else if (zeichenCode == 8) {
-        s_text = s_text.substr(0, s_text.length - 1)
+    } else {
+        if (zeichenCode == 27 || pins.keypadConnected() && zeichenText == "*") {
+            s_text = ""
+        } else if (zeichenCode == 8) {
+            s_text = s_text.substr(0, s_text.length - 1)
+        } else if (isASCII) {
+            s_text = "" + s_text + zeichenText
+        }
         pins.oled_write_text(3, 0, 15, s_text)
     }
 })
@@ -67,7 +66,7 @@ input.onButtonEvent(Button.B, input.buttonEventClick(), function () {
     i2c_schleife = false
     anzeige01_aktualisieren()
     basic.setLedColor(0xff0000)
-    empf_break = false
+    modem.empfang_abbrechen(false)
     pins.oled_clear(5, 7)
     pins.oled_write_text(5, 0, 15, pins.pins_text("Empfang Start"))
     e_text = empfangen_bis_13()
@@ -84,7 +83,7 @@ function anzeige01_aktualisieren () {
 }
 function empfangen_bis_13 () {
     empf_text = ""
-    while (!(empf_break)) {
+    while (!(modem.empf_abbrechen())) {
         empf_asc = modem.empfange_1zeichen()
         if (empf_asc == 13) {
             break;
@@ -106,12 +105,10 @@ input.onButtonEvent(Button.A, ButtonEvent.Hold, function () {
 })
 input.onButtonEvent(Button.B, ButtonEvent.Hold, function () {
     modem.empfang_abbrechen()
-    empf_break = true
 })
 let empf_asc = 0
 let empf_text = ""
 let e_text = ""
-let empf_break = false
 let s_text = ""
 let led_an = false
 let i2c_schleife = false
