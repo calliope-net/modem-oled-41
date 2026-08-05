@@ -24,7 +24,7 @@ input.onButtonEvent(Button.A, input.buttonEventClick(), function () {
     }
     modem.comment("ENTER (CR) anhängen")
     modem.sende_code(13)
-    pins.oled_write_text(2, 0, 15, pins.pins_text("Senden Ende"))
+    pins.oled_write_text(2, 0, 15, "Senden Ende " + send_text.length)
     basic.setLedColor(0x00ff00)
 })
 function empfangen () {
@@ -36,7 +36,7 @@ function empfangen () {
         } else if (modem.between(empf_asc, 32, 127)) {
             empf_text = "" + empf_text + String.fromCharCode(empf_asc)
         } else {
-            empf_text = "" + empf_text + "|" + empf_asc + "|"
+            empf_text = "" + empf_text + empf_asc
         }
         pins.oled_write_text(6, 0, 15, empf_text)
     }
@@ -45,7 +45,6 @@ function empfangen () {
 input.onButtonEvent(Button.AB, input.buttonEventClick(), function () {
     modem.empfang_abbrechen()
     empf_break = true
-    basic.showString(empf_text)
 })
 function anzeige_aktualisieren () {
     pins.oled_write_text(0, 0, 15, "hell<" + modem.get_settings(modem.e_settings.helligkeit) + "<dunkel")
@@ -64,8 +63,9 @@ input.onButtonEvent(Button.B, input.buttonEventClick(), function () {
     empf_break = false
     pins.oled_clear(5, 7)
     pins.oled_write_text(5, 0, 15, pins.pins_text("Empfang Start"))
-    pins.oled_write_text(7, 0, 15, empfangen())
-    pins.oled_write_text(5, 0, 15, pins.pins_text("Empfang Ende"))
+    e_text = empfangen()
+    pins.oled_write_text(7, 0, 15, e_text)
+    pins.oled_write_text(5, 0, 15, "Empfang Ende " + e_text.length)
     basic.setLedColor(0x00ff00)
 })
 input.onButtonEvent(Button.A, ButtonEvent.Hold, function () {
@@ -79,6 +79,7 @@ input.onButtonEvent(Button.B, ButtonEvent.Hold, function () {
     ft_messen = !(ft_messen)
     anzeige_aktualisieren()
 })
+let e_text = ""
 let empf_asc = 0
 let empf_break = false
 let empf_text = ""
