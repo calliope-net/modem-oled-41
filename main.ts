@@ -1,6 +1,6 @@
 function senden (send_text: string) {
     modem.comment("blau: Text senden")
-    i2c_lock = true
+    i2c_schleife = false
     if (led_an) {
         led_an = false
         pins.pinDigitalWrite(modem.get_settings(modem.e_settings.pin_led), led_an)
@@ -20,7 +20,7 @@ function senden (send_text: string) {
     modem.sende_code(13)
     pins.oled_write_text(2, 0, 15, "Senden Ende " + send_text.length)
     led_aktualisieren()
-    i2c_lock = false
+    i2c_schleife = true
 }
 function GitHub () {
     modem.comment("calliope-net/modem-41")
@@ -30,6 +30,7 @@ function GitHub () {
     modem.comment("I²C OLED; optional Keypad oder Keyboard")
 }
 pins.onKeyboardEvent(function (zeichenCode, zeichenText, isASCII) {
+    modem.comment("Ereignis in der i2c_schleife")
     if (s_text.length == 0) {
         pins.oled_clear(2, 4)
     }
@@ -41,6 +42,9 @@ pins.onKeyboardEvent(function (zeichenCode, zeichenText, isASCII) {
         s_text = ""
     } else if (isASCII) {
         s_text = "" + s_text + zeichenText
+        pins.oled_write_text(3, 0, 15, s_text)
+    } else if (zeichenCode == 8) {
+        s_text = s_text.substr(0, s_text.length - 1)
         pins.oled_write_text(3, 0, 15, s_text)
     }
 })
@@ -75,7 +79,7 @@ input.onButtonEvent(Button.AB, input.buttonEventClick(), function () {
 })
 input.onButtonEvent(Button.B, input.buttonEventClick(), function () {
     modem.comment("rot: Text empfangen")
-    i2c_lock = true
+    i2c_schleife = false
     anzeige01_aktualisieren()
     basic.setLedColor(0xff0000)
     empf_break = false
@@ -85,7 +89,7 @@ input.onButtonEvent(Button.B, input.buttonEventClick(), function () {
     pins.oled_write_text(7, 0, 15, e_text)
     pins.oled_write_text(5, 0, 15, "Empfang Ende " + e_text.length)
     led_aktualisieren()
-    i2c_lock = true
+    i2c_schleife = true
 })
 function anzeige01_aktualisieren () {
     basic.pause(100)
@@ -110,7 +114,7 @@ let empf_break = false
 let empf_text = ""
 let s_text = ""
 let led_an = false
-let i2c_lock = false
+let i2c_schleife = false
 let kb_on = false
 if (!(pins.simulator())) {
     modem.set_pins(DigitalPin.C17, AnalogPin.C16)
@@ -124,9 +128,10 @@ if (!(pins.simulator())) {
         pins.oled_write_text(2, 0, 15, pins.pins_text("Keypad on"))
     }
     led_aktualisieren()
+    i2c_schleife = true
 }
 loops.everyInterval(500, function () {
-    if (!(i2c_lock)) {
+    if (i2c_schleife) {
         pins.oled_write_text(1, 0, 6, "FT " + pins.pinAnalogRead(modem.get_settings(modem.e_settings.pin_fototransistor)))
         pins.raiseKeyboardEvent(kb_on)
         pins.raiseKeypadEvent(pins.keypadConnected())
